@@ -1,7 +1,7 @@
 local typedefs = require "kong.db.schema.typedefs"
 
 return {
-  name = "plainid",
+  name = "openid_authzen",
   fields = {
     -- {
     --   -- this plugin will only be applied to Services or Routes
