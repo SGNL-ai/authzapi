@@ -45,3 +45,28 @@ plugins:
   - http
   - https
   enabled: true
+- id: bc8fc574-8540-4dc8-bbcd-cd1b671ab801
+  protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  name: cors
+  enabled: true
+  route: 51799165-1a03-495c-b390-4ac7e7047061
+  config:
+    origins:
+      - http://localhost:3000
+      - https://citadel.demo.aserto.com
+    credentials: false
+    preflight_continue: false
+    methods:
+      - GET
+      - HEAD
+      - PUT
+      - PATCH
+      - POST
+      - DELETE
+      - OPTIONS
+      - TRACE
+      - CONNECT

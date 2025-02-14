@@ -46,7 +46,8 @@
   "gateways": {
     "--Pass Through--": "https://authzen-todo-backend.demo.aserto.com",
     "AWS API Gateway": "https://aws-gateway.authzen-interop.net",
-    "Envoy": "https://authzen-envoy-proxy-demo.cerbos.dev"
+    "Envoy": "https://authzen-envoy-proxy-demo.cerbos.dev",
+    "Kong": "https://plainid-kong-gw.se-plainid.com"
   },
   "gatewayPdps": {
     "Aserto": "http://authzen-gateway-proxy.demo.aserto.com",
