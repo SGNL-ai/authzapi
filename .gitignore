@@ -3,7 +3,7 @@
 .idea
 
 # Dependencies
-*/node_modules
+node_modules
 
 # Production
 */build
@@ -25,6 +25,7 @@ coverage
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+yarn.lock
 
 .pnp
 .pnp.js

@@ -6,12 +6,12 @@ const AUTHZEN_PDP_URL =
 const AUTHZEN_PDP_API_KEY = process.env.AUTHZEN_PDP_API_KEY;
 
 enum OutputTypes {
-  MARKDOWN,
+  HTML,
   CONSOLE,
 }
 
 const FORMAT =
-  process.argv[3] === "markdown" ? OutputTypes.MARKDOWN : OutputTypes.CONSOLE;
+  process.argv[3] === "html" ? OutputTypes.HTML : OutputTypes.CONSOLE;
 
 type Endpoint = "evaluation" | "evaluations";
 
@@ -30,9 +30,9 @@ async function main() {
 
     <format> should be one of:
       console
-      markdown
+      html
 
-      and defaults to markdown
+      and defaults to html
   `);
     process.exit(0);
   }
@@ -41,6 +41,8 @@ async function main() {
   const { evaluation, evaluations } = require(decisionFile);
 
   const results: Result[] = [];
+
+  const startTime = new Date().getTime();
 
   for (const decision of evaluation || []) {
     const result = await execute(decision, "evaluation");
@@ -52,16 +54,20 @@ async function main() {
     results.push(result);
   }
 
-  if (FORMAT === OutputTypes.MARKDOWN) {
+  const endTime = new Date().getTime();
+
+  if (FORMAT === OutputTypes.HTML) {
     console.log(
-      arrayToTable(
+      wrapHTML(
+      arrayToTable(startTime, endTime,
         results.map((d) => {
           return {
             result: d.status,
             request: JSON.stringify(d.request, null, 2),
+            response: JSON.stringify(d.response, null, 2)
           };
         })
-      )
+      ))
     );
   }
 }
@@ -133,32 +139,49 @@ function logResult(result: Result) {
   }
 }
 
-function arrayToTable(array) {
-  var cols = Object.keys(array[0]);
-  var table = `<table>
+function arrayToTable(startTime, endTime, array) {
+  var table = `<table class="results">
   <tr>
-    <th>result</th>
-    <th>request</th>
+    <th>Result</th>
+    <th>Request</th>
+    <th>Actual Response</th>
   </tr>
 `;
   // Generate table body
+  var counter = 0;
+  var success = 0;
   array.forEach(function (item) {
-    const bgColor = item.result ? "green" : "red";
-    table += `  <tr>
-    <td bgColor="${bgColor}">${String(item.result)}</td>
+    var odd = counter++ % 2 === 0 ? "odd" : "even";
+    if (item.result) success++;
+    const testResult = item.result ? "success" : "fail";
+    table += `  <tr class="${odd}">
+    <td class="${testResult}">${String(item.result)}</td>
     <td>
 
 `;
-    table += "```js\r\n" + item.request + "\r\n```\r\n\r\n";
-    table += `  </td>
+    table += "<pre>" + item.request + "</pre>";
+    table += `  </td><td><pre>${item.response}</pre></td>
   </tr>
 `;
   });
 
   table += "</table>";
+  var rate = (success / array.length) * 100;
+  table += `<p>Success rate: ${success}/${array.length} (${rate}%).</p>`;
+  table += `<p>Test run on ${new Date().toISOString()}</p>`;
+  table+= `<p>Test duration: ${((endTime - startTime)/1000).toFixed(2)} s.</p>`;
 
   // Return table
   return table;
+}
+
+function wrapHTML(body) {
+  return `<!DOCTYPE html>` + 
+         `<html lang="en">` + 
+         `<head><meta charset="UTF-8"><style>*{font-family: Helvetica, Arial, sans-serif;}th{background-color: #555555; color: #eeeeee;} .success{background: green; color: white;} .fail{background: red; color: white;} .odd{background-color: #eeeeee;} td, th{padding: 5px;} tr{border: solid 1px black;} pre{font-family: monospace; font-size: small;}table{border-collapse: collapse;}</style><title>AuthZEN Test Results</title></head><body><h1>Test Results</h1>` + 
+         body + 
+         `</body></html>`;
+
 }
 
 main();
